@@ -9,6 +9,9 @@
 '''
 
 def force_unknown_to_left(sequence):
+	'''
+		Switch the block containing the ? on the left side
+	'''
 	if is_unknown_left(sequence): 
 		return sequence
 	else:
@@ -26,16 +29,21 @@ def force_unknown_to_left(sequence):
 	return right_side + ['='] + left_side
 
 def is_unknown_left(sequence):
+	'''
+		Checks if the '?' is on the left side of the '='
+	'''
 	equal_found = False
 	for term in sequence:
 		if term == "?":
 			return not equal_found
 		if term == "=":
 			equal_found = True
-	#no unknown => invalid sequence, should be error
 	return False 
 
 def get_should_inverse(sequence):
+	'''
+		Returns true if the unknown value is a denominator
+	'''
 	current_operator = '+'
 	for term in sequence:
 		if term in ['+', '-', '/', '*']:
@@ -67,11 +75,12 @@ def get_multiplicative_term_sequence(sequence):
 			is_div = True
 		elif term.isnumeric():
 			if is_div ^ should_inverse:
-				#if term = 0, all is despair and loss 
+				# Division by 0. How to signal error?
+				if term == 0:
+					return []
 				terms.append(1/float(term))
 			else:
 				terms.append(float(term))	
-	print(terms)
 	return terms
 		
 def get_unknown_sign(sequence):
@@ -99,7 +108,6 @@ def get_additive_term_sequence(sequence):
 			sign = -1
 		elif term.isnumeric():
 			terms.append(int(term) * sign * sign_unknown)
-	print(terms)
 	return terms
 
 def is_additive_sequence(sequence):

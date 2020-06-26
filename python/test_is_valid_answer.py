@@ -3,6 +3,13 @@ from is_valid_answer import *
 def test_all():
 	test_validate_answer()
 	test_force_unknown_to_left()
+	test_is_unknown_left()
+
+def test_is_unknown_left():
+	assert is_unknown_left(['1', '+', '?', '=', '3']) == True
+	assert is_unknown_left(['1', '-', '3', '=', '?']) == False
+	#bad sequence
+	assert is_unknown_left(['1', '+', '1', '=', '2']) == False
 
 def test_force_unknown_to_left():
 	assert force_unknown_to_left(['3', '+', '2', '=', '?']) == ['?', '=', '3', '+', '2']
@@ -42,7 +49,6 @@ def test_validate_answer():
 	assert is_valid_answer(['3', '*', '2', '/', '2', '=', '?'], ['?', '/', '3', '=', '2', '/', '2'], []) == True
 	assert is_valid_answer(['1', '*', '3', '*', '2', '/', '2', '=', '?'], ['?', '/', '3', '=', '2', '/', '2'], []) == False
 	assert is_valid_answer(['3', '*', '2', '/', '2', '=', '?', '/', '5'], ['?', '/', '5', '/', '3', '=', '2', '/', '2'], []) == True
-
 
 
 test_all()
