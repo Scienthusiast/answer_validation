@@ -1,3 +1,30 @@
+def force_unknown_to_left(sequence):
+	if is_unknown_left(sequence): 
+		return sequence
+	else:
+		left_side = []
+		right_side = []
+		equal_found = False
+		for i in sequence:
+			if i == '=':
+				equal_found = True
+			else:
+				if equal_found:
+					right_side.append(i)
+				else:
+					left_side.append(i)
+	return right_side + ['='] + left_side
+
+def is_unknown_left(sequence):
+	equal_found = False
+	for term in sequence:
+		if term == "?":
+			return not equal_found
+		if term == "=":
+			equal_found = True
+	#no unknown => invalid sequence, should be error
+	return False 
+
 def get_should_inverse(sequence):
 	current_operator = '+'
 	for term in sequence:
@@ -10,19 +37,30 @@ def get_should_inverse(sequence):
 	return False
 
 def get_multiplicative_term_sequence(sequence):
-	terms = []
+#test 
 	for i in sequence:
 		assert (i.isnumeric()) or (i in ['/', '*', '?', '='])
 
+	#unknown_left = is_unknown_left(sequence)
+	#should rather force the unknown to the left
+
+	should_inverse = get_should_inverse(sequence)
+	is_div = False
+
+	terms = []
 	should_inverse_unknown = get_should_inverse(sequence)
-	should_inverse = False
+
 	for term in sequence:
-		if term in ['=', '*']:
-			should_inverse = False
+		if term in ['=']:
+			is_div = False
+			should_inverse = not should_inverse
+		elif term == '*':
+			is_div = False
 		elif term == '/':
-			should_inverse = True
+			is_div = True
 		elif term.isnumeric():
-			if should_inverse ^ should_inverse_unknown:
+			if is_div ^ should_inverse:
+				#if term = 0, all is despair and loss 
 				terms.append(1/float(term))
 			else:
 				terms.append(float(term))	
@@ -32,7 +70,7 @@ def get_multiplicative_term_sequence(sequence):
 def get_unknown_sign(sequence):
 	sign = 1
 	for term in sequence:
-		if term in ['=', '+']:
+		if term == ['=', '+']:
 			sign = 1
 		elif term == '-':
 			sign = -1
@@ -45,7 +83,10 @@ def get_additive_term_sequence(sequence):
 	sign_unknown = get_unknown_sign(sequence)
 	sign = 1
 	for term in sequence:
-		if term in ['=', '+']:
+		if term == '=':
+			sign = 1
+			sign_unknown = -1 * sign_unknown
+		elif term == '+':
 			sign = 1
 		elif term == '-':
 			sign = -1
@@ -61,6 +102,7 @@ def is_additive_sequence(sequence):
 	return True
 
 def ordered_term_sequence(sequence):
+	sequence = force_unknown_to_left(sequence)
 	if is_additive_sequence(sequence):
 		term_sequence = get_additive_term_sequence(sequence)
 	else:
@@ -89,6 +131,20 @@ def is_valid_answer(answer, target, forbidden_ops):
 	ordered_target = ordered_term_sequence(target) 
 	return are_identical(ordered_answer, ordered_target)
 
+
+
+def test_all():
+	test_validate_answer()
+	test_force_unknown_to_left()
+
+def test_force_unknown_to_left():
+	assert force_unknown_to_left(['3', '+', '2', '=', '?']) == ['?', '=', '3', '+', '2']
+	a = ['?', '-', '2', '=', '3', '+', '2']
+	assert force_unknown_to_left(a) == a
+
+	#bad sequences (shouldn't happen)
+	assert force_unknown_to_left([]) == ['=']
+
 def test_validate_answer():
 	assert is_valid_answer(['3', '+', '?', '=', '5'], ['3', '+', '?', '=', '5'], []) == True
 	assert is_valid_answer(['3', '+', '?', '=', '5', '4'], ['3', '+', '?', '=', '5'], []) == False
@@ -101,14 +157,21 @@ def test_validate_answer():
 	assert is_valid_answer(['1', '-', '?', '=', '5'], ['1', '+', '?', '=', '5'], []) == False
 	assert is_valid_answer(['1', '-', '?', '=', '5'], ['5', '=', '1', '-', '?'], []) == True
 	assert is_valid_answer(['12', '-', '4', '+', '?', '=', '4'], ['4', '=', '12', '-', '4', '+', '?'], []) == True
+	assert is_valid_answer(['42', '+', '12', '-', '?', '=', '44', '+', '21', '-', '1'], ['?', '=', '44', '+', '21', '-', '1', '-', '42', '-', '12'], []) == False
+	assert is_valid_answer(['42', '+', '12', '-', '?', '=', '44', '+', '21', '-', '1'], ['?', '=', '1', '-', '44', '-', '21', '+', '42', '+', '12'], []) == True
 
 	# *, /
 	assert is_valid_answer(['3', '*', '?', '=', '5'], ['?', '=', '5', '/', '3'], []) == True
-	return
 	assert is_valid_answer(['3', '/', '?', '=', '5'], ['?', '=', '3', '/', '5'], []) == True
-
 	assert is_valid_answer(['3', '*', '?', '=', '5'], ['?', '=', '3', '*', '5'], []) == False
 	assert is_valid_answer(['?', '*', '3', '=', '5'], ['?', '=', '3', '*', '5'], []) == False
+	assert is_valid_answer(['5', '=', '3', '*', '?'], ['?', '=', '5', '/', '3'], []) == True
+	assert is_valid_answer(['5', '=', '3', '/', '?'], ['?', '=', '3', '/', '5'], []) == True
+	assert is_valid_answer(['5', '=', '3', '*', '?'], ['?', '=', '3', '*', '5'], []) == False
+	assert is_valid_answer(['5', '=', '?', '*', '3'], ['?', '=', '3', '*', '5'], []) == False
+
+	assert is_valid_answer(['?', '*', '4', '=', '5'], ['?', '=', '5', '/', '4'], []) == True
 
 
-test_validate_answer()
+
+test_all()
