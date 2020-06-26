@@ -1,3 +1,13 @@
+'''
+	Assumptions
+	- an expression must contain one and only one '='
+	- an expression must contain one and only one '?'
+	- an expression must contains either ('+' AND '-') OR ('*' AND '/') operators 
+	- all numbers are integers
+	- '-' is always an operator, never a sign
+	- there is no check for dividing by 0
+'''
+
 def force_unknown_to_left(sequence):
 	if is_unknown_left(sequence): 
 		return sequence
@@ -37,9 +47,6 @@ def get_should_inverse(sequence):
 	return False
 
 def get_multiplicative_term_sequence(sequence):
-#test 
-	for i in sequence:
-		assert (i.isnumeric()) or (i in ['/', '*', '?', '='])
 
 	#unknown_left = is_unknown_left(sequence)
 	#should rather force the unknown to the left
@@ -125,53 +132,11 @@ def contains_forbidden_operator(answer, forbidden_ops):
 	return False 
 
 def is_valid_answer(answer, target, forbidden_ops):
+	for i in answer:
+		assert (i.isnumeric()) or (i in ['/', '*', '?', '=', '+', '-'])
+
 	if contains_forbidden_operator(answer, forbidden_ops):
 		return False
 	ordered_answer = ordered_term_sequence(answer)
 	ordered_target = ordered_term_sequence(target) 
 	return are_identical(ordered_answer, ordered_target)
-
-
-
-def test_all():
-	test_validate_answer()
-	test_force_unknown_to_left()
-
-def test_force_unknown_to_left():
-	assert force_unknown_to_left(['3', '+', '2', '=', '?']) == ['?', '=', '3', '+', '2']
-	a = ['?', '-', '2', '=', '3', '+', '2']
-	assert force_unknown_to_left(a) == a
-
-	#bad sequences (shouldn't happen)
-	assert force_unknown_to_left([]) == ['=']
-
-def test_validate_answer():
-	assert is_valid_answer(['3', '+', '?', '=', '5'], ['3', '+', '?', '=', '5'], []) == True
-	assert is_valid_answer(['3', '+', '?', '=', '5', '4'], ['3', '+', '?', '=', '5'], []) == False
-	assert is_valid_answer([], [], []) == True
-
-	#forbidden_operators
-	assert is_valid_answer(['3', '*', '?', '=', '5'], ['3', '*', '?', '=', '5'], ['*']) == False
-	assert is_valid_answer(['3', '+', '?', '=', '5'], ['3', '+', '?', '=', '5'], ['*', '/']) == True
-	assert is_valid_answer(['3', '/', '?', '=', '5'], ['3', '/', '?', '=', '5'], ['*', '/']) == False
-	assert is_valid_answer(['1', '-', '?', '=', '5'], ['1', '+', '?', '=', '5'], []) == False
-	assert is_valid_answer(['1', '-', '?', '=', '5'], ['5', '=', '1', '-', '?'], []) == True
-	assert is_valid_answer(['12', '-', '4', '+', '?', '=', '4'], ['4', '=', '12', '-', '4', '+', '?'], []) == True
-	assert is_valid_answer(['42', '+', '12', '-', '?', '=', '44', '+', '21', '-', '1'], ['?', '=', '44', '+', '21', '-', '1', '-', '42', '-', '12'], []) == False
-	assert is_valid_answer(['42', '+', '12', '-', '?', '=', '44', '+', '21', '-', '1'], ['?', '=', '1', '-', '44', '-', '21', '+', '42', '+', '12'], []) == True
-
-	# *, /
-	assert is_valid_answer(['3', '*', '?', '=', '5'], ['?', '=', '5', '/', '3'], []) == True
-	assert is_valid_answer(['3', '/', '?', '=', '5'], ['?', '=', '3', '/', '5'], []) == True
-	assert is_valid_answer(['3', '*', '?', '=', '5'], ['?', '=', '3', '*', '5'], []) == False
-	assert is_valid_answer(['?', '*', '3', '=', '5'], ['?', '=', '3', '*', '5'], []) == False
-	assert is_valid_answer(['5', '=', '3', '*', '?'], ['?', '=', '5', '/', '3'], []) == True
-	assert is_valid_answer(['5', '=', '3', '/', '?'], ['?', '=', '3', '/', '5'], []) == True
-	assert is_valid_answer(['5', '=', '3', '*', '?'], ['?', '=', '3', '*', '5'], []) == False
-	assert is_valid_answer(['5', '=', '?', '*', '3'], ['?', '=', '3', '*', '5'], []) == False
-
-	assert is_valid_answer(['?', '*', '4', '=', '5'], ['?', '=', '5', '/', '4'], []) == True
-
-
-
-test_all()
