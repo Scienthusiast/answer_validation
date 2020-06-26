@@ -1,39 +1,72 @@
-
-def is_unknown_left(sequence):
-	equal_found = False
+def get_should_inverse(sequence):
+	current_operator = '+'
 	for term in sequence:
-		if term == "?":
-			return not equal_found
-		if term == "=":
-			equal_found = True
-	#no unknown => invalid sequence, error
-	return False 
+		if term in ['+', '-', '/', '*']:
+			current_operator = term
+		elif term == '=':
+			current_operator = '+'
+		elif term == '?':
+			return current_operator == '/'
+	return False
 
-def term_sequence(sequence):
+def get_multiplicative_term_sequence(sequence):
 	terms = []
-	unknown_left = is_unknown_left(sequence)
-	equal_found_sign = -1
-	sign = 1
-	sign_unknown = 1
+	for i in sequence:
+		assert (i.isnumeric()) or (i in ['/', '*', '?', '='])
+
+	should_inverse_unknown = get_should_inverse(sequence)
+	should_inverse = False
 	for term in sequence:
-		if term == "=":
-			sign = 1
-			equal_found_sign = 1
-		elif term == "-":
-			sign = -1
-		elif term == "+":
-			sign = 1
-		elif term == "?":
-			sign_unknown = sign
-		elif term.isnumeric:
-			terms.append(sign * equal_found_sign * int(term) * sign_unknown)
-#this is programming by coincidence for the moment... if it works I don't really know why / how
-	
-	# PROBLEME avec "-?"
-			# sign
-	
+		if term in ['=', '*']:
+			should_inverse = False
+		elif term == '/':
+			should_inverse = True
+		elif term.isnumeric():
+			if should_inverse ^ should_inverse_unknown:
+				terms.append(1/float(term))
+			else:
+				terms.append(float(term))	
 	print(terms)
 	return terms
+		
+def get_unknown_sign(sequence):
+	sign = 1
+	for term in sequence:
+		if term in ['=', '+']:
+			sign = 1
+		elif term == '-':
+			sign = -1
+		if term == '?':
+			return sign
+	return 0
+
+def get_additive_term_sequence(sequence):
+	terms = []
+	sign_unknown = get_unknown_sign(sequence)
+	sign = 1
+	for term in sequence:
+		if term in ['=', '+']:
+			sign = 1
+		elif term == '-':
+			sign = -1
+		elif term.isnumeric():
+			terms.append(int(term) * sign * sign_unknown)
+	print(terms)
+	return terms
+
+def is_additive_sequence(sequence):
+	for term in sequence:
+		if term in ['/', '*']:
+			return False
+	return True
+
+def ordered_term_sequence(sequence):
+	if is_additive_sequence(sequence):
+		term_sequence = get_additive_term_sequence(sequence)
+	else:
+		term_sequence = get_multiplicative_term_sequence(sequence)
+	term_sequence.sort()
+	return term_sequence
 
 def are_identical(sequence1, sequence2):
 	if (len(sequence1) != len(sequence2)):
@@ -52,8 +85,8 @@ def contains_forbidden_operator(answer, forbidden_ops):
 def is_valid_answer(answer, target, forbidden_ops):
 	if contains_forbidden_operator(answer, forbidden_ops):
 		return False
-	ordered_answer = term_sequence(answer)
-	ordered_target = term_sequence(target) 
+	ordered_answer = ordered_term_sequence(answer)
+	ordered_target = ordered_term_sequence(target) 
 	return are_identical(ordered_answer, ordered_target)
 
 def test_validate_answer():
@@ -65,10 +98,17 @@ def test_validate_answer():
 	assert is_valid_answer(['3', '*', '?', '=', '5'], ['3', '*', '?', '=', '5'], ['*']) == False
 	assert is_valid_answer(['3', '+', '?', '=', '5'], ['3', '+', '?', '=', '5'], ['*', '/']) == True
 	assert is_valid_answer(['3', '/', '?', '=', '5'], ['3', '/', '?', '=', '5'], ['*', '/']) == False
-
-	#
 	assert is_valid_answer(['1', '-', '?', '=', '5'], ['1', '+', '?', '=', '5'], []) == False
-
+	assert is_valid_answer(['1', '-', '?', '=', '5'], ['5', '=', '1', '-', '?'], []) == True
 	assert is_valid_answer(['12', '-', '4', '+', '?', '=', '4'], ['4', '=', '12', '-', '4', '+', '?'], []) == True
+
+	# *, /
+	assert is_valid_answer(['3', '*', '?', '=', '5'], ['?', '=', '5', '/', '3'], []) == True
+	return
+	assert is_valid_answer(['3', '/', '?', '=', '5'], ['?', '=', '3', '/', '5'], []) == True
+
+	assert is_valid_answer(['3', '*', '?', '=', '5'], ['?', '=', '3', '*', '5'], []) == False
+	assert is_valid_answer(['?', '*', '3', '=', '5'], ['?', '=', '3', '*', '5'], []) == False
+
 
 test_validate_answer()
