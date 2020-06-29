@@ -225,9 +225,9 @@ const isInvalidExpression = function(
             if (!shouldBeOperand) return true; //an operand following an operand
             shouldBeOperand = false;
         }
-        else return true;
+        else return true; // invalid term
     }
-    return (!foundUnknown); // true if no unknown found
+    return (!foundUnknown || shouldBeOperand); // true if no unknown found or if an operand was expected
 }
 
 const isValidAnswer = function(
@@ -263,6 +263,23 @@ const doTests = () => {
     testIsValidAnswer();
     testForceUnknowToLeft();
     testIsUnknownLeft();
+    testIsValidExpression();
+}
+
+const testIsValidExpression = () => {
+
+    console.assert (isInvalidExpression(['?', '=']) == true, "isInvalidExpression(['?', '=']) == true");
+    console.assert (isInvalidExpression(['=', '?']) == true, "isInvalidExpression(['=', '?']) == true");
+    console.assert (isInvalidExpression(['1', '=', '?']) == false, "isInvalidExpression(['1', '=', '?']) == false");
+    console.assert (isInvalidExpression(['1', '+', '-', '2', '=', '?']) == true, "isInvalidExpression(['1', '+', '-', '2', '=', '?']) == true");
+    console.assert (isInvalidExpression(['-', '2', '=', '?']) == true, "isInvalidExpression(['-', '2', '=', '?']) == true");
+    console.assert (isInvalidExpression(['3', '-', '2', '?']) == true, "isInvalidExpression(['3', '-', '2', '?']) == true");
+    console.assert (isInvalidExpression(['3', '-', '2', '=']) == true, "isInvalidExpression(['3', '-', '2', '=']) == true");
+    console.assert (isInvalidExpression(['3']) == true, "isInvalidExpression(['3']) == true");
+    console.assert (isInvalidExpression([]) == true, "isInvalidExpression([]) == true");
+    console.assert (isInvalidExpression(['1', '=', '1']) == true, "isInvalidExpression(['1', '=', '1']) == true");
+
+    console.assert (isInvalidExpression(['1', '=', 'X']) == true, "isInvalidExpression(['1', '=', 'X']) == true");
 }
 
 const testIsUnknownLeft = () => {

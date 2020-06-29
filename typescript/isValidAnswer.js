@@ -187,9 +187,9 @@ var isInvalidExpression = function (answer) {
             shouldBeOperand = false;
         }
         else
-            return true;
+            return true; // invalid term
     }
-    return (!foundUnknown); // true if no unknown found
+    return (!foundUnknown || shouldBeOperand); // true if no unknown found or if an operand was expected
 };
 var isValidAnswer = function (answer, target, forbiddenOps) {
     if (isInvalidExpression(answer)
@@ -216,6 +216,20 @@ var doTests = function () {
     testIsValidAnswer();
     testForceUnknowToLeft();
     testIsUnknownLeft();
+    testIsValidExpression();
+};
+var testIsValidExpression = function () {
+    console.assert(isInvalidExpression(['?', '=']) == true, "isInvalidExpression(['?', '=']) == true");
+    console.assert(isInvalidExpression(['=', '?']) == true, "isInvalidExpression(['=', '?']) == true");
+    console.assert(isInvalidExpression(['1', '=', '?']) == false, "isInvalidExpression(['1', '=', '?']) == false");
+    console.assert(isInvalidExpression(['1', '+', '-', '2', '=', '?']) == true, "isInvalidExpression(['1', '+', '-', '2', '=', '?']) == true");
+    console.assert(isInvalidExpression(['-', '2', '=', '?']) == true, "isInvalidExpression(['-', '2', '=', '?']) == true");
+    console.assert(isInvalidExpression(['3', '-', '2', '?']) == true, "isInvalidExpression(['3', '-', '2', '?']) == true");
+    console.assert(isInvalidExpression(['3', '-', '2', '=']) == true, "isInvalidExpression(['3', '-', '2', '=']) == true");
+    console.assert(isInvalidExpression(['3']) == true, "isInvalidExpression(['3']) == true");
+    console.assert(isInvalidExpression([]) == true, "isInvalidExpression([]) == true");
+    console.assert(isInvalidExpression(['1', '=', '1']) == true, "isInvalidExpression(['1', '=', '1']) == true");
+    console.assert(isInvalidExpression(['1', '=', 'X']) == true, "isInvalidExpression(['1', '=', 'X']) == true");
 };
 var testIsUnknownLeft = function () {
     console.assert(isUnknownLeft(['1', '+', '?', '=', '3']) == true, "isUnknownLeft(['1', '+', '?', '=', '3']) == true");
