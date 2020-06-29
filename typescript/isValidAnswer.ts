@@ -202,33 +202,32 @@ const isOperator = function(
 const isInvalidExpression = function(
     answer: string[],
 ): boolean {
-
-    //missing "shouldBeOperator"
-
     let shouldBeOperand: boolean = true;
     let foundUnknown: boolean = false;
+    let equalFound: boolean = false;
     for (let term of answer) {
         if (isOperator(term) || term === '=') {
             if (shouldBeOperand) {
-                return true;
+                return true; // two operators in a row
+            }
+            if (term === '=') {
+                if (equalFound) return true; //2 equal signs
+                equalFound = true;
             }
             shouldBeOperand = true;
         }
         else if (term === '?') {
-            if (foundUnknown) return false;
+            if (foundUnknown || !shouldBeOperand) return true; // 2 '?' or '?' following an operand
             foundUnknown = true;
-            if (!shouldBeOperand) return true;
             shouldBeOperand = false;
         }
         else if (isNumeric(term)) {
-            if (!shouldBeOperand) return true;
+            if (!shouldBeOperand) return true; //an operand following an operand
             shouldBeOperand = false;
         }
-        else {
-            return true;
-        }
+        else return true;
     }
-    return (!foundUnknown);
+    return (!foundUnknown); // true if no unknown found
 }
 
 const isValidAnswer = function(
