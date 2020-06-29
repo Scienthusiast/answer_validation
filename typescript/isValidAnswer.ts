@@ -165,7 +165,6 @@ const orderedTermSequence = function(
         : getMultiplicativeTermSequence(sequenceUnknownLeft)
 
     termSequence.sort( (a: string, b: string) => Number(a) - Number(b));
-    console.log("Sequence", sequence, 'TermSequence', termSequence);
     return (termSequence);
 }
 
@@ -203,8 +202,6 @@ const isValidAnswer = function(
         orderedTermSequence(target)
     );
 }
-
-
 
 // TESTS
 
@@ -273,12 +270,12 @@ const testValdateAnswer = () => {
     console.assert (isValidAnswer(['3', '*', '2', '/', '2', '=', '?', '/', '5'], ['?', '/', '5', '/', '3', '=', '2', '/', '2'], []) == true, "isValidAnswer(['3', '*', '2', '/', '2', '=', '?', '/', '5'], ['?', '/', '5', '/', '3', '=', '2', '/', '2'], []) == true");
     
     // incorrect expressions
-    console.assert (isValidAnswer(['3', '2', '=', '?'], ['3', '+', '2', '=', '?'], []) == false);
-    console.assert (isValidAnswer(['3', '+', '2', '=', '?'], ['3', '-', '-', '2', '=', '?'], []) == false);
-    console.assert (isValidAnswer(['3', '+', '2', '=', '?'], ['3', '-', '2', '-', '=', '?'], []) == false);
+    console.assert (isValidAnswer(['3', '2', '=', '?'], ['3', '+', '2', '=', '?'], []) == false, "['3', '2', '=', '?'], ['3', '+', '2', '=', '?'], []) == false");
+    console.assert (isValidAnswer(['3', '+', '2', '=', '?'], ['3', '-', '-', '2', '=', '?'], []) == false, "['3', '+', '2', '=', '?'], ['3', '-', '-', '2', '=', '?'], []) == false");
+    console.assert (isValidAnswer(['3', '+', '2', '=', '?'], ['3', '-', '2', '-', '=', '?'], []) == false, "['3', '+', '2', '=', '?'], ['3', '-', '2', '-', '=', '?'], []) == false");
 
     // - not as operator, but as sign
-    console.assert (isValidAnswer(['1', '+', '2', '-', '5', '=', '?'], ['1', '-', '?', '=', '-', '2', '+', '5'], []) == true);
+    console.assert (isValidAnswer(['1', '+', '2', '-', '5', '=', '?'], ['1', '-', '?', '=', '-', '2', '+', '5'], []) == true, "['1', '+', '2', '-', '5', '=', '?'], ['1', '-', '?', '=', '-', '2', '+', '5'], []) == true");
 }
 
 doTests();
