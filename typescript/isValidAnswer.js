@@ -159,15 +159,35 @@ var isOperator = function (str) {
     return [OPERATORS.ADD, OPERATORS.SUB, OPERATORS.MUL, OPERATORS.DIV].indexOf(str) !== -1;
 };
 var isInvalidExpression = function (answer) {
+    //missing "shouldBeOperator"
     var shouldBeOperand = true;
+    var foundUnknown = false;
     for (var _i = 0, answer_1 = answer; _i < answer_1.length; _i++) {
         var term = answer_1[_i];
-        if (isOperator(term)) {
-            if (shouldBeOperand)
+        if (isOperator(term) || term === '=') {
+            if (shouldBeOperand) {
+                return true;
+            }
+            shouldBeOperand = true;
+        }
+        else if (term === '?') {
+            if (foundUnknown)
                 return false;
+            foundUnknown = true;
+            if (!shouldBeOperand)
+                return true;
+            shouldBeOperand = false;
+        }
+        else if (isNumeric(term)) {
+            if (!shouldBeOperand)
+                return true;
+            shouldBeOperand = false;
+        }
+        else {
+            return true;
         }
     }
-    return true;
+    return (!foundUnknown);
 };
 var isValidAnswer = function (answer, target, forbiddenOps) {
     if (isInvalidExpression(answer)
@@ -191,7 +211,7 @@ function arraysEqual(a, b) {
     return true;
 }
 var doTests = function () {
-    testValdateAnswer();
+    testIsValidAnswer();
     testForceUnknowToLeft();
     testIsUnknownLeft();
 };
@@ -206,7 +226,7 @@ var testForceUnknowToLeft = function () {
     console.assert(arraysEqual(forceUnknownToLeft(a), a), "forceUnknownToLeft(a) == a");
     console.assert(arraysEqual(forceUnknownToLeft([]), ['=']), "forceUnknownToLeft([]) == ['=']");
 };
-var testValdateAnswer = function () {
+var testIsValidAnswer = function () {
     console.assert(isValidAnswer(['3', '+', '?', '=', '5'], ['3', '+', '?', '=', '5'], []) == true, "isValidAnswer(['3', '+', '?', '=', '5'], ['3', '+', '?', '=', '5'], []) == true");
     console.assert(isValidAnswer(['3', '+', '?', '=', '5', '4'], ['3', '+', '?', '=', '5'], []) == false, "isValidAnswer(['3', '+', '?', '=', '5', '4'], ['3', '+', '?', '=', '5'], []) == false");
     // forbidden_operators
@@ -234,7 +254,7 @@ var testValdateAnswer = function () {
     console.assert(isValidAnswer(['3', '*', '2', ':', '2', '=', '?', ':', '5'], ['?', ':', '5', ':', '3', '=', '2', ':', '2'], []) == true, "isValidAnswer(['3', '*', '2', ':', '2', '=', '?', ':', '5'], ['?', ':', '5', ':', '3', '=', '2', ':', '2'], []) == true");
     // incorrect expressions
     console.assert(isValidAnswer([], [], []) == false, "isValidAnswer([], [], []) == false");
-    console.assert(isValidAnswer(['='], ['1', '=', '1'], []) == false);
+    console.assert(isValidAnswer(['='], ['1', '=', '1'], []) == true, "['='], ['1', '=', '1'], []) == false");
     console.assert(isValidAnswer(['3', '2', '=', '?'], ['3', '+', '2', '=', '?'], []) == false, "['3', '2', '=', '?'], ['3', '+', '2', '=', '?'], []) == false");
     console.assert(isValidAnswer(['3', '+', '2', '=', '?'], ['3', '-', '-', '2', '=', '?'], []) == false, "['3', '+', '2', '=', '?'], ['3', '-', '-', '2', '=', '?'], []) == false");
     console.assert(isValidAnswer(['3', '+', '2', '=', '?'], ['3', '-', '2', '-', '=', '?'], []) == false, "['3', '+', '2', '=', '?'], ['3', '-', '2', '-', '=', '?'], []) == false");

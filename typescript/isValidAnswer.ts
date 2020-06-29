@@ -203,14 +203,32 @@ const isInvalidExpression = function(
     answer: string[],
 ): boolean {
 
-    let shouldBeOperand: boolean = true;
-    for (let term of answer) {
-        if (isOperator(term)) {
-            if (shouldBeOperand) return false;
+    //missing "shouldBeOperator"
 
+    let shouldBeOperand: boolean = true;
+    let foundUnknown: boolean = false;
+    for (let term of answer) {
+        if (isOperator(term) || term === '=') {
+            if (shouldBeOperand) {
+                return true;
+            }
+            shouldBeOperand = true;
+        }
+        else if (term === '?') {
+            if (foundUnknown) return false;
+            foundUnknown = true;
+            if (!shouldBeOperand) return true;
+            shouldBeOperand = false;
+        }
+        else if (isNumeric(term)) {
+            if (!shouldBeOperand) return true;
+            shouldBeOperand = false;
+        }
+        else {
+            return true;
         }
     }
-    return true;
+    return (!foundUnknown);
 }
 
 const isValidAnswer = function(
@@ -243,7 +261,7 @@ function arraysEqual(a, b) {
 }
 
 const doTests = () => {
-    testValdateAnswer();
+    testIsValidAnswer();
     testForceUnknowToLeft();
     testIsUnknownLeft();
 }
@@ -262,7 +280,7 @@ const testForceUnknowToLeft = () => {
     console.assert (arraysEqual(forceUnknownToLeft([]), ['=']), "forceUnknownToLeft([]) == ['=']");
 }
 
-const testValdateAnswer = () => {
+const testIsValidAnswer = () => {
     console.assert (isValidAnswer(['3', '+', '?', '=', '5'], ['3', '+', '?', '=', '5'], []) == true, "isValidAnswer(['3', '+', '?', '=', '5'], ['3', '+', '?', '=', '5'], []) == true");
     console.assert (isValidAnswer(['3', '+', '?', '=', '5', '4'], ['3', '+', '?', '=', '5'], []) == false, "isValidAnswer(['3', '+', '?', '=', '5', '4'], ['3', '+', '?', '=', '5'], []) == false");
 
@@ -296,7 +314,7 @@ const testValdateAnswer = () => {
     
     // incorrect expressions
     console.assert (isValidAnswer([], [], []) == false, "isValidAnswer([], [], []) == false");
-    console.assert (isValidAnswer(['='], ['1', '=', '1'], []) == false);
+    console.assert (isValidAnswer(['='], ['1', '=', '1'], []) == false, "['='], ['1', '=', '1'], []) == false");
     console.assert (isValidAnswer(['3', '2', '=', '?'], ['3', '+', '2', '=', '?'], []) == false, "['3', '2', '=', '?'], ['3', '+', '2', '=', '?'], []) == false");
     console.assert (isValidAnswer(['3', '+', '2', '=', '?'], ['3', '-', '-', '2', '=', '?'], []) == false, "['3', '+', '2', '=', '?'], ['3', '-', '-', '2', '=', '?'], []) == false");
     console.assert (isValidAnswer(['3', '+', '2', '=', '?'], ['3', '-', '2', '-', '=', '?'], []) == false, "['3', '+', '2', '=', '?'], ['3', '-', '2', '-', '=', '?'], []) == false");
