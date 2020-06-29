@@ -76,7 +76,7 @@ def get_multiplicative_term_sequence(sequence):
 		elif term.isnumeric():
 			if is_div ^ should_inverse:
 				# Division by 0. How to signal error?
-				if term == 0:
+				if float(term) == 0.0:
 					return []
 				terms.append(1/float(term))
 			else:
