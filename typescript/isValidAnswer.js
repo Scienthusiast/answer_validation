@@ -47,8 +47,8 @@ var getMultiplicativeTermSequence = function (sequence) {
             default:
                 if (isNumeric(term)) {
                     terms.push(((isDivision ? 1 : 0) ^ (shouldInverse ? 1 : 0))
-                        ? 1 / Number(term)
-                        : Number(term));
+                        ? Number(term)
+                        : 1 / Number(term));
                 }
         }
     }
@@ -92,7 +92,7 @@ var getAdditiveTermSequence = function (sequence) {
                 break;
             default:
                 if (isNumeric(term)) {
-                    terms.push(parseInt(term) * sign * signUnknown);
+                    terms.push(parseInt(term) * sign * signUnknown * -1);
                 }
                 break;
         }
@@ -137,7 +137,7 @@ var orderedTermSequence = function (sequence) {
         getAdditiveTermSequence(sequenceUnknownLeft)
         : getMultiplicativeTermSequence(sequenceUnknownLeft);
     termSequence.sort(function (a, b) { return Number(a) - Number(b); });
-    // console.log("Sequence", sequence, 'TermSequence', termSequence);
+    console.log("Sequence", sequence, 'TermSequence', termSequence);
     return (termSequence);
 };
 var areIdentical = function (sequence1, sequence2) {
@@ -202,7 +202,6 @@ var testValdateAnswer = function () {
     console.assert(isValidAnswer(['12', '-', '4', '+', '?', '=', '4'], ['4', '=', '12', '-', '4', '+', '?'], []) == true, "isValidAnswer(['12', '-', '4', '+', '?', '=', '4'], ['4', '=', '12', '-', '4', '+', '?'], []) == true");
     console.assert(isValidAnswer(['42', '+', '12', '-', '?', '=', '44', '+', '21', '-', '1'], ['?', '=', '44', '+', '21', '-', '1', '-', '42', '-', '12'], []) == false, "isValidAnswer(['42', '+', '12', '-', '?', '=', '44', '+', '21', '-', '1'], ['?', '=', '44', '+', '21', '-', '1', '-', '42', '-', '12'], []) == false");
     console.assert(isValidAnswer(['42', '+', '12', '-', '?', '=', '44', '+', '21', '-', '1'], ['?', '=', '1', '-', '44', '-', '21', '+', '42', '+', '12'], []) == true, "isValidAnswer(['42', '+', '12', '-', '?', '=', '44', '+', '21', '-', '1'], ['?', '=', '1', '-', '44', '-', '21', '+', '42', '+', '12'], []) == true");
-    console.assert(isValidAnswer(['1', '+', '2', '-', '5', '=', '?'], ['1', '-', '?', '=', '-', '2', '+', '5'], []) == true);
     //  multiplicative expressions
     console.assert(isValidAnswer(['3', '*', '?', '=', '5'], ['?', '=', '5', '/', '3'], []) == true, "isValidAnswer(['3', '*', '?', '=', '5'], ['?', '=', '5', '/', '3'], []) == true");
     console.assert(isValidAnswer(['3', '/', '?', '=', '5'], ['?', '=', '3', '/', '5'], []) == true, "isValidAnswer(['3', '/', '?', '=', '5'], ['?', '=', '3', '/', '5'], []) == true");
@@ -216,5 +215,11 @@ var testValdateAnswer = function () {
     console.assert(isValidAnswer(['3', '*', '2', '/', '2', '=', '?'], ['?', '/', '3', '=', '2', '/', '2'], []) == true, "isValidAnswer(['3', '*', '2', '/', '2', '=', '?'], ['?', '/', '3', '=', '2', '/', '2'], []) == true");
     console.assert(isValidAnswer(['1', '*', '3', '*', '2', '/', '2', '=', '?'], ['?', '/', '3', '=', '2', '/', '2'], []) == false, "isValidAnswer(['1', '*', '3', '*', '2', '/', '2', '=', '?'], ['?', '/', '3', '=', '2', '/', '2'], []) == false");
     console.assert(isValidAnswer(['3', '*', '2', '/', '2', '=', '?', '/', '5'], ['?', '/', '5', '/', '3', '=', '2', '/', '2'], []) == true, "isValidAnswer(['3', '*', '2', '/', '2', '=', '?', '/', '5'], ['?', '/', '5', '/', '3', '=', '2', '/', '2'], []) == true");
+    // incorrect expressions
+    console.assert(isValidAnswer(['3', '2', '=', '?'], ['3', '+', '2', '=', '?'], []) == false);
+    console.assert(isValidAnswer(['3', '+', '2', '=', '?'], ['3', '-', '-', '2', '=', '?'], []) == false);
+    console.assert(isValidAnswer(['3', '+', '2', '=', '?'], ['3', '-', '2', '-', '=', '?'], []) == false);
+    // - not as operator, but as sign
+    console.assert(isValidAnswer(['1', '+', '2', '-', '5', '=', '?'], ['1', '-', '?', '=', '-', '2', '+', '5'], []) == true);
 };
 doTests();
