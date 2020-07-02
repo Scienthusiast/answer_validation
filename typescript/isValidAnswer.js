@@ -2,7 +2,7 @@
     Assumptions
     - an expression must contain one and only one '='
     - an expression must contain one and only one '?'
-    - an expression must contains either ('+' AND '-') OR ('*' AND ':') operators
+    - an expression must contains either ('+' AND '-') OR ('x' AND ':') operators
     - all numbers are integers
     - '-' is always an operator, never a sign
     - there is no check for dividing by 0
@@ -11,7 +11,7 @@ var OPERATORS = {
     ADD: '+',
     SUB: '-',
     DIV: ':',
-    MUL: '*'
+    MUL: 'x'
 };
 var getShouldInverse = function (sequence) {
     var currentOperator = OPERATORS.ADD;
@@ -198,7 +198,6 @@ var isValidAnswer = function (answer, target, forbiddenOps) {
     }
     return areIdentical(orderedTermSequence(answer), orderedTermSequence(target));
 };
-// TESTS
 function arraysEqual(a, b) {
     if (a === b)
         return true;
@@ -212,6 +211,7 @@ function arraysEqual(a, b) {
     }
     return true;
 }
+// TESTS
 var doTests = function () {
     testIsValidAnswer();
     testForceUnknowToLeft();
@@ -246,9 +246,9 @@ var testIsValidAnswer = function () {
     console.assert(isValidAnswer(['3', '+', '?', '=', '5'], ['3', '+', '?', '=', '5'], []) == true, "isValidAnswer(['3', '+', '?', '=', '5'], ['3', '+', '?', '=', '5'], []) == true");
     console.assert(isValidAnswer(['3', '+', '?', '=', '5', '4'], ['3', '+', '?', '=', '5'], []) == false, "isValidAnswer(['3', '+', '?', '=', '5', '4'], ['3', '+', '?', '=', '5'], []) == false");
     // forbidden_operators
-    console.assert(isValidAnswer(['3', '*', '?', '=', '5'], ['3', '*', '?', '=', '5'], ['*']) == false, "isValidAnswer(['3', '*', '?', '=', '5'], ['3', '*', '?', '=', '5'], ['*']) == false");
-    console.assert(isValidAnswer(['3', '+', '?', '=', '5'], ['3', '+', '?', '=', '5'], ['*', ':']) == true, "isValidAnswer(['3', '+', '?', '=', '5'], ['3', '+', '?', '=', '5'], ['*', ':']) == true");
-    console.assert(isValidAnswer(['3', ':', '?', '=', '5'], ['3', ':', '?', '=', '5'], ['*', ':']) == false, "isValidAnswer(['3', ':', '?', '=', '5'], ['3', ':', '?', '=', '5'], ['*', ':']) == false");
+    console.assert(isValidAnswer(['3', 'x', '?', '=', '5'], ['3', 'x', '?', '=', '5'], ['x']) == false, "isValidAnswer(['3', 'x', '?', '=', '5'], ['3', 'x', '?', '=', '5'], ['x']) == false");
+    console.assert(isValidAnswer(['3', '+', '?', '=', '5'], ['3', '+', '?', '=', '5'], ['x', ':']) == true, "isValidAnswer(['3', '+', '?', '=', '5'], ['3', '+', '?', '=', '5'], ['x', ':']) == true");
+    console.assert(isValidAnswer(['3', ':', '?', '=', '5'], ['3', ':', '?', '=', '5'], ['x', ':']) == false, "isValidAnswer(['3', ':', '?', '=', '5'], ['3', ':', '?', '=', '5'], ['x', ':']) == false");
     //  additive expressions
     console.assert(isValidAnswer(['1', '-', '?', '=', '5'], ['1', '+', '?', '=', '5'], []) == false, "isValidAnswer(['1', '-', '?', '=', '5'], ['1', '+', '?', '=', '5'], []) == false");
     console.assert(isValidAnswer(['1', '-', '?', '=', '5'], ['5', '=', '1', '-', '?'], []) == true, "isValidAnswer(['1', '-', '?', '=', '5'], ['5', '=', '1', '-', '?'], []) == true");
@@ -256,18 +256,18 @@ var testIsValidAnswer = function () {
     console.assert(isValidAnswer(['42', '+', '12', '-', '?', '=', '44', '+', '21', '-', '1'], ['?', '=', '44', '+', '21', '-', '1', '-', '42', '-', '12'], []) == false, "isValidAnswer(['42', '+', '12', '-', '?', '=', '44', '+', '21', '-', '1'], ['?', '=', '44', '+', '21', '-', '1', '-', '42', '-', '12'], []) == false");
     console.assert(isValidAnswer(['42', '+', '12', '-', '?', '=', '44', '+', '21', '-', '1'], ['?', '=', '1', '-', '44', '-', '21', '+', '42', '+', '12'], []) == true, "isValidAnswer(['42', '+', '12', '-', '?', '=', '44', '+', '21', '-', '1'], ['?', '=', '1', '-', '44', '-', '21', '+', '42', '+', '12'], []) == true");
     //  multiplicative expressions
-    console.assert(isValidAnswer(['3', '*', '?', '=', '5'], ['?', '=', '5', ':', '3'], []) == true, "isValidAnswer(['3', '*', '?', '=', '5'], ['?', '=', '5', ':', '3'], []) == true");
+    console.assert(isValidAnswer(['3', 'x', '?', '=', '5'], ['?', '=', '5', ':', '3'], []) == true, "isValidAnswer(['3', 'x', '?', '=', '5'], ['?', '=', '5', ':', '3'], []) == true");
     console.assert(isValidAnswer(['3', ':', '?', '=', '5'], ['?', '=', '3', ':', '5'], []) == true, "isValidAnswer(['3', ':', '?', '=', '5'], ['?', '=', '3', ':', '5'], []) == true");
-    console.assert(isValidAnswer(['3', '*', '?', '=', '5'], ['?', '=', '3', '*', '5'], []) == false, "isValidAnswer(['3', '*', '?', '=', '5'], ['?', '=', '3', '*', '5'], []) == false");
-    console.assert(isValidAnswer(['?', '*', '3', '=', '5'], ['?', '=', '3', '*', '5'], []) == false, "isValidAnswer(['?', '*', '3', '=', '5'], ['?', '=', '3', '*', '5'], []) == false");
-    console.assert(isValidAnswer(['5', '=', '3', '*', '?'], ['?', '=', '5', ':', '3'], []) == true, "isValidAnswer(['5', '=', '3', '*', '?'], ['?', '=', '5', ':', '3'], []) == true");
+    console.assert(isValidAnswer(['3', 'x', '?', '=', '5'], ['?', '=', '3', 'x', '5'], []) == false, "isValidAnswer(['3', 'x', '?', '=', '5'], ['?', '=', '3', 'x', '5'], []) == false");
+    console.assert(isValidAnswer(['?', 'x', '3', '=', '5'], ['?', '=', '3', 'x', '5'], []) == false, "isValidAnswer(['?', 'x', '3', '=', '5'], ['?', '=', '3', 'x', '5'], []) == false");
+    console.assert(isValidAnswer(['5', '=', '3', 'x', '?'], ['?', '=', '5', ':', '3'], []) == true, "isValidAnswer(['5', '=', '3', 'x', '?'], ['?', '=', '5', ':', '3'], []) == true");
     console.assert(isValidAnswer(['5', '=', '3', ':', '?'], ['?', '=', '3', ':', '5'], []) == true, "isValidAnswer(['5', '=', '3', ':', '?'], ['?', '=', '3', ':', '5'], []) == true");
-    console.assert(isValidAnswer(['5', '=', '3', '*', '?'], ['?', '=', '3', '*', '5'], []) == false, "isValidAnswer(['5', '=', '3', '*', '?'], ['?', '=', '3', '*', '5'], []) == false");
-    console.assert(isValidAnswer(['5', '=', '?', '*', '3'], ['?', '=', '3', '*', '5'], []) == false, "isValidAnswer(['5', '=', '?', '*', '3'], ['?', '=', '3', '*', '5'], []) == false");
-    console.assert(isValidAnswer(['?', '*', '4', '=', '5'], ['?', '=', '5', ':', '4'], []) == true, "isValidAnswer(['?', '*', '4', '=', '5'], ['?', '=', '5', ':', '4'], []) == true");
-    console.assert(isValidAnswer(['3', '*', '2', ':', '2', '=', '?'], ['?', ':', '3', '=', '2', ':', '2'], []) == true, "isValidAnswer(['3', '*', '2', ':', '2', '=', '?'], ['?', ':', '3', '=', '2', ':', '2'], []) == true");
-    console.assert(isValidAnswer(['1', '*', '3', '*', '2', ':', '2', '=', '?'], ['?', ':', '3', '=', '2', ':', '2'], []) == false, "isValidAnswer(['1', '*', '3', '*', '2', ':', '2', '=', '?'], ['?', ':', '3', '=', '2', ':', '2'], []) == false");
-    console.assert(isValidAnswer(['3', '*', '2', ':', '2', '=', '?', ':', '5'], ['?', ':', '5', ':', '3', '=', '2', ':', '2'], []) == true, "isValidAnswer(['3', '*', '2', ':', '2', '=', '?', ':', '5'], ['?', ':', '5', ':', '3', '=', '2', ':', '2'], []) == true");
+    console.assert(isValidAnswer(['5', '=', '3', 'x', '?'], ['?', '=', '3', 'x', '5'], []) == false, "isValidAnswer(['5', '=', '3', 'x', '?'], ['?', '=', '3', 'x', '5'], []) == false");
+    console.assert(isValidAnswer(['5', '=', '?', 'x', '3'], ['?', '=', '3', 'x', '5'], []) == false, "isValidAnswer(['5', '=', '?', 'x', '3'], ['?', '=', '3', 'x', '5'], []) == false");
+    console.assert(isValidAnswer(['?', 'x', '4', '=', '5'], ['?', '=', '5', ':', '4'], []) == true, "isValidAnswer(['?', 'x', '4', '=', '5'], ['?', '=', '5', ':', '4'], []) == true");
+    console.assert(isValidAnswer(['3', 'x', '2', ':', '2', '=', '?'], ['?', ':', '3', '=', '2', ':', '2'], []) == true, "isValidAnswer(['3', 'x', '2', ':', '2', '=', '?'], ['?', ':', '3', '=', '2', ':', '2'], []) == true");
+    console.assert(isValidAnswer(['1', 'x', '3', 'x', '2', ':', '2', '=', '?'], ['?', ':', '3', '=', '2', ':', '2'], []) == false, "isValidAnswer(['1', 'x', '3', 'x', '2', ':', '2', '=', '?'], ['?', ':', '3', '=', '2', ':', '2'], []) == false");
+    console.assert(isValidAnswer(['3', 'x', '2', ':', '2', '=', '?', ':', '5'], ['?', ':', '5', ':', '3', '=', '2', ':', '2'], []) == true, "isValidAnswer(['3', 'x', '2', ':', '2', '=', '?', ':', '5'], ['?', ':', '5', ':', '3', '=', '2', ':', '2'], []) == true");
     // incorrect expressions
     console.assert(isValidAnswer([], [], []) == false, "isValidAnswer([], [], []) == false");
     console.assert(isValidAnswer(['='], ['1', '=', '1'], []) == false, "['='], ['1', '=', '1'], []) == false");

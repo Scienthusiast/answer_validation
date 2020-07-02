@@ -2,11 +2,18 @@
 	Assumptions
 	- an expression must contain one and only one '='
 	- an expression must contain one and only one '?'
-	- an expression must contains either ('+' AND '-') OR ('*' AND '/') operators 
+	- an expression must contains either ('+' AND '-') OR ('x' AND '/') operators 
 	- all numbers are integers
 	- '-' is always an operator, never a sign
 	- there is no check for dividing by 0
 '''
+
+OPERATORS = {
+	'ADD': '+',
+    'SUB': '-',
+    'DIV': ':',
+    'MUL': 'x'
+}
 
 def force_unknown_to_left(sequence):
 	'''
@@ -44,34 +51,29 @@ def get_should_inverse(sequence):
 	'''
 		Returns true if the unknown value is a denominator
 	'''
-	current_operator = '+'
+	current_operator = OPERATORS['ADD']
 	for term in sequence:
-		if term in ['+', '-', '/', '*']:
+		if term in OPERATORS.values():
 			current_operator = term
 		elif term == '=':
-			current_operator = '+'
+			current_operator = OPERATORS['ADD']
 		elif term == '?':
-			return current_operator == '/'
+			return current_operator == OPERATORS['DIV']
 	return False
 
 def get_multiplicative_term_sequence(sequence):
 
-	#unknown_left = is_unknown_left(sequence)
-	#should rather force the unknown to the left
-
 	should_inverse = get_should_inverse(sequence)
 	is_div = False
-
 	terms = []
-	should_inverse_unknown = get_should_inverse(sequence)
 
 	for term in sequence:
 		if term in ['=']:
 			is_div = False
 			should_inverse = not should_inverse
-		elif term == '*':
+		elif term == OPERATORS['MUL']:
 			is_div = False
-		elif term == '/':
+		elif term == OPERATORS['DIV']:
 			is_div = True
 		elif term.isnumeric():
 			if is_div ^ should_inverse:
@@ -86,9 +88,9 @@ def get_multiplicative_term_sequence(sequence):
 def get_unknown_sign(sequence):
 	sign = 1
 	for term in sequence:
-		if term == ['=', '+']:
+		if term == ['=', OPERATORS['ADD']]:
 			sign = 1
-		elif term == '-':
+		elif term == OPERATORS['SUB']:
 			sign = -1
 		if term == '?':
 			return sign
@@ -102,9 +104,9 @@ def get_additive_term_sequence(sequence):
 		if term == '=':
 			sign = 1
 			sign_unknown = -1 * sign_unknown
-		elif term == '+':
+		elif term == OPERATORS['ADD']:
 			sign = 1
-		elif term == '-':
+		elif term == OPERATORS['SUB']:
 			sign = -1
 		elif term.isnumeric():
 			terms.append(int(term) * sign * sign_unknown)
@@ -112,7 +114,7 @@ def get_additive_term_sequence(sequence):
 
 def is_additive_sequence(sequence):
 	for term in sequence:
-		if term in ['/', '*']:
+		if term in [OPERATORS['DIV'], OPERATORS['MUL']]:
 			return False
 	return True
 
@@ -139,11 +141,38 @@ def contains_forbidden_operator(answer, forbidden_ops):
 			return True
 	return False 
 
-def is_valid_answer(answer, target, forbidden_ops):
-	for i in answer:
-		assert (i.isnumeric()) or (i in ['/', '*', '?', '=', '+', '-'])
+def is_operator(term):
+	return term in OPERATORS.values()
 
-	if contains_forbidden_operator(answer, forbidden_ops):
+def is_invalid_expression(expr):
+	should_be_operand = True
+	found_unknown = False
+	equal_found = False
+
+	for term in expr:
+		if is_operator(term) or term == '=':
+			if should_be_operand:
+				return True #two operators in a row
+			if term == '=':
+				if equal_found:
+					return True #2 equal signs
+				equal_found = True
+			should_be_operand = True
+		elif term == '?':
+			if (found_unknown or not should_be_operand):
+				return True #2 '?' or '?' following an operand
+			found_unknown = True
+			should_be_operand = False
+		elif term.isnumeric():
+			if not should_be_operand:
+				return True #an operand following an operand
+			should_be_operand = False
+		else:
+			return True #invalid term
+	return (not found_unknown or should_be_operand) # true if no unknown found or if an operand was expected
+
+def is_valid_answer(answer, target, forbidden_ops):
+	if is_invalid_expression(answer) or contains_forbidden_operator(answer, forbidden_ops):
 		return False
 	ordered_answer = ordered_term_sequence(answer)
 	ordered_target = ordered_term_sequence(target) 
